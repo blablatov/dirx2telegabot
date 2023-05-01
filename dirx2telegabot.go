@@ -20,15 +20,16 @@ func main() {
 	log.SetPrefix("Client event: ")
 	log.SetFlags(log.Lshortfile)
 
-	os.Setenv("telega_botoken", "5853322065:AAHwqJwOEVOrLMcpKf-vOW5rOYp4eByFevs")
+	//os.Setenv("telega_botoken", "5853322065:AAHwqJwOEVOrLMcpKf-vOW5rOYp4eByFevs")
 
 	// TLS connect. Подключение по протоколу TLS
-	//mux := http.NewServeMux()
-	//mux.HandleFunc("/Заявка", handler)
-	//mux.HandleFunc("/Задание", handler)
-	http.HandleFunc("/Заявка", handler)
+	mux := http.NewServeMux()
+	mux.HandleFunc("/Приказ", http.HandlerFunc(handler))
+	mux.HandleFunc("/Заявка", http.HandlerFunc(handler))
+	mux.HandleFunc("/Задание", http.HandlerFunc(handler))
+	//http.HandleFunc("/Заявка", handler)
 	//log.Fatal(http.ListenAndServeTLS("localhost:8077", crtFile, keyFile, nil))
-	log.Fatal(http.ListenAndServe("localhost:8077", nil))
+	log.Fatal(http.ListenAndServe("localhost:8077", mux))
 }
 
 // This handler is returning component path of URL. Обработчик возвращает путь к компоненту URL
@@ -57,18 +58,43 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	updates := bot.GetUpdatesChan(u)
 
 	for update := range updates {
-		//if update.Message != nil || r.URL.Path != "" { // If we got a message. Если получаем сообщение
-		if r.URL.Path != "" { // If we got a message. Если получаем сообщение
-			log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
+		if r.URL.Path == "" { //
+			continue
+		}
 
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
-			msg.ReplyToMessageID = update.Message.MessageID
+		/*if update.Message == nil { // ignore any non-Message updates
+			continue
+		}
 
-			tmsg := r.URL.Path
-			msg.Text = (tmsg)
+		if !update.Message.IsCommand() { // ignore any non-command Messages
+			continue
+		}*/
 
-			bot.Send(msg)
-			//r.URL.Path = ""
+		// Create a new MessageConfig. We don't have text yet,
+		// so we leave it empty.
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
+
+		// Extract the command from the Message.
+		switch r.URL.Path {
+		case "/Приказ":
+			update.Message.Command()
+			msg.Text = "Ознакомтесь с Приказом."
+			r.URL.Path = ""
+		case "/Заявка":
+			update.Message.Command()
+			msg.Text = "Вам поступила Заявка."
+			r.URL.Path = ""
+		case "/Задание":
+			update.Message.Command()
+			msg.Text = "Вам поступило Задание."
+			r.URL.Path = ""
+		default:
+			update.Message.Command()
+			msg.Text = "Поступил документ."
+		}
+
+		if _, err := bot.Send(msg); err != nil {
+			log.Panic(err)
 		}
 	}
 }
