@@ -20,6 +20,8 @@ func main() {
 	log.SetPrefix("Client event: ")
 	log.SetFlags(log.Lshortfile)
 
+	os.Setenv("telega_botoken", "5853322065:AAHwqJwOEVOrLMcpKf-vOW5rOYp4eByFevs")
+
 	// TLS connect. Подключение по протоколу TLS
 	//mux := http.NewServeMux()
 	//mux.HandleFunc("/Заявка", handler)
@@ -36,9 +38,10 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	// Getting token from config. Получение токена из конфига.
 	chkey := make(chan string)
 	go func() {
-		chkey <- ReadBotKey()
+		chkey <- readToken()
 	}()
 
+	//bot, err := tgbotapi.NewBotAPI(os.Getenv("telega_botoken"))
 	bot, err := tgbotapi.NewBotAPI(<-chkey)
 	if err != nil {
 		log.Fatalf("Error of bot-api: %v", err)
@@ -54,21 +57,24 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	updates := bot.GetUpdatesChan(u)
 
 	for update := range updates {
-		if update.Message != nil { // If we got a message. Если получаем сообщение
+		//if update.Message != nil || r.URL.Path != "" { // If we got a message. Если получаем сообщение
+		if r.URL.Path != "" { // If we got a message. Если получаем сообщение
 			log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
 
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
 			msg.ReplyToMessageID = update.Message.MessageID
-			tmsg := "DirectumRX:Входящие:Задание"
+
+			tmsg := r.URL.Path
 			msg.Text = (tmsg)
 
 			bot.Send(msg)
+			//r.URL.Path = ""
 		}
 	}
 }
 
 // Func reads token from file the ./botoken.conf. Метод получения токена из конфига.
-func ReadBotKey() string {
+func readToken() string {
 	var botkey string
 	bk, err := os.Open("botoken.conf")
 	if err != nil {
