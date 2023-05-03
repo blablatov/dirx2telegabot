@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -18,14 +19,14 @@ var (
 
 var numericKeyboard = tgbotapi.NewInlineKeyboardMarkup(
 	tgbotapi.NewInlineKeyboardRow(
-		tgbotapi.NewInlineKeyboardButtonURL("1.com", "http://1.com"),
-		tgbotapi.NewInlineKeyboardButtonData("2", "2"),
-		tgbotapi.NewInlineKeyboardButtonData("3", "3"),
+		tgbotapi.NewInlineKeyboardButtonURL("Directum RX", "http://directum-server.ru"),
+		tgbotapi.NewInlineKeyboardButtonData("Приказы", "Приказы"),
+		tgbotapi.NewInlineKeyboardButtonData("Заявки", "Заявки"),
 	),
 	tgbotapi.NewInlineKeyboardRow(
-		tgbotapi.NewInlineKeyboardButtonData("4", "4"),
-		tgbotapi.NewInlineKeyboardButtonData("5", "5"),
-		tgbotapi.NewInlineKeyboardButtonData("6", "6"),
+		tgbotapi.NewInlineKeyboardButtonURL("Задания", "http://directum-server.ru/Задания"),
+		tgbotapi.NewInlineKeyboardButtonURL("Сообщения", "http://directum-server.ru/Сообщения"),
+		tgbotapi.NewInlineKeyboardButtonURL("Согласования", "http://directum-server.ru/Согласования"),
 	),
 )
 
@@ -35,12 +36,11 @@ func main() {
 
 	//os.Setenv("telega_botoken", "5853322065:AAHwqJwOEVOrLMcpKf-vOW5rOYp4eByFevs")
 
-	// TLS connect. Подключение по протоколу TLS
+	// TLS or simple connect. Подключение по протоколу TLS или базовое
 	mux := http.NewServeMux()
 	mux.HandleFunc("/Приказ", http.HandlerFunc(handler))
 	mux.HandleFunc("/Заявка", http.HandlerFunc(handler))
 	mux.HandleFunc("/Задание", http.HandlerFunc(handler))
-	//http.HandleFunc("/Заявка", handler)
 	//log.Fatal(http.ListenAndServeTLS("localhost:8077", crtFile, keyFile, nil))
 	log.Fatal(http.ListenAndServe("localhost:8077", mux))
 }
@@ -48,6 +48,8 @@ func main() {
 // This handler is returning component path of URL. Обработчик возвращает путь к компоненту URL
 func handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "URL.Path = %q\n", r.URL.Path)
+
+	surl := strings.TrimPrefix(r.URL.Path, "/")
 
 	// Getting token from config. Получение токена из конфига.
 	chkey := make(chan string)
@@ -72,17 +74,33 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	// Loop through each update.
 	for update := range updates {
+
+		if surl == "" { // ignore any non-Message updates
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
+			msg.Text = "Очередь Directum RX пуста"
+			if _, err = bot.Send(msg); err != nil {
+				panic(err)
+			}
+			continue
+		}
+
 		// Check if we've gotten a message update.
 		if update.Message != nil {
 			// Construct a new message from the given chat ID and containing
 			// the text that we received.
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, surl)
 
 			// If the message was open, add a copy of our numeric keyboard.
 			switch update.Message.Text {
-			case "open":
+			case "dirx":
 				msg.ReplyMarkup = numericKeyboard
-
+			default:
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
+				msg.Text = "Введите: dirx"
+				if _, err = bot.Send(msg); err != nil {
+					panic(err)
+				}
+				continue
 			}
 
 			// Send the message.
@@ -103,6 +121,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 				panic(err)
 			}
 		}
+		surl = ""
 	}
 }
 
