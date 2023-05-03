@@ -20,11 +20,11 @@ var (
 var numericKeyboard = tgbotapi.NewInlineKeyboardMarkup(
 	tgbotapi.NewInlineKeyboardRow(
 		tgbotapi.NewInlineKeyboardButtonURL("Directum RX", "http://directum-server.ru"),
-		tgbotapi.NewInlineKeyboardButtonData("Приказы", "Приказы"),
-		tgbotapi.NewInlineKeyboardButtonData("Заявки", "Заявки"),
+		tgbotapi.NewInlineKeyboardButtonData("Приказы", "Переход в Приказы СЭД Directum RX"),
+		tgbotapi.NewInlineKeyboardButtonData("Заявки", "Переход в Заявки СЭД Directum RX"),
 	),
 	tgbotapi.NewInlineKeyboardRow(
-		tgbotapi.NewInlineKeyboardButtonURL("Задания", "http://directum-server.ru/Задания"),
+		tgbotapi.NewInlineKeyboardButtonData("Задания", "Переход в Задания СЭД Directum RX"),
 		tgbotapi.NewInlineKeyboardButtonURL("Сообщения", "http://directum-server.ru/Сообщения"),
 		tgbotapi.NewInlineKeyboardButtonURL("Согласования", "http://directum-server.ru/Согласования"),
 	),
@@ -38,9 +38,9 @@ func main() {
 
 	// TLS or simple connect. Подключение по протоколу TLS или базовое
 	mux := http.NewServeMux()
-	mux.HandleFunc("/Приказ", http.HandlerFunc(handler))
-	mux.HandleFunc("/Заявка", http.HandlerFunc(handler))
-	mux.HandleFunc("/Задание", http.HandlerFunc(handler))
+	mux.HandleFunc("/Получен Приказ", http.HandlerFunc(handler))
+	mux.HandleFunc("/Получена Заявка", http.HandlerFunc(handler))
+	mux.HandleFunc("/Получено Задание", http.HandlerFunc(handler))
 	//log.Fatal(http.ListenAndServeTLS("localhost:8077", crtFile, keyFile, nil))
 	log.Fatal(http.ListenAndServe("localhost:8077", mux))
 }
@@ -75,13 +75,14 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	// Loop through each update.
 	for update := range updates {
 
-		if surl == "" { // ignore any non-Message updates
+		if surl == "" && update.Message.Text == "dirx" { // ignore any non-Message updates
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
 			msg.Text = "Очередь Directum RX пуста"
 			if _, err = bot.Send(msg); err != nil {
 				panic(err)
+			} else {
+				continue
 			}
-			continue
 		}
 
 		// Check if we've gotten a message update.
