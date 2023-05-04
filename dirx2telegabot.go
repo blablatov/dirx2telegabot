@@ -19,14 +19,14 @@ var (
 
 var numericKeyboard = tgbotapi.NewInlineKeyboardMarkup(
 	tgbotapi.NewInlineKeyboardRow(
-		tgbotapi.NewInlineKeyboardButtonURL("Directum RX", "http://directum-server.ru"),
-		tgbotapi.NewInlineKeyboardButtonData("Приказы", "Переход в Приказы СЭД Directum RX"),
-		tgbotapi.NewInlineKeyboardButtonData("Заявки", "Переход в Заявки СЭД Directum RX"),
+		tgbotapi.NewInlineKeyboardButtonURL("Общие папки", "http://directum-server.ru"),
+		tgbotapi.NewInlineKeyboardButtonData("Входящие", "Переход в Входящие СЭД Directum RX"),
+		tgbotapi.NewInlineKeyboardButtonData("Исходящие", "Переход в Исходящие СЭД Directum RX"),
 	),
 	tgbotapi.NewInlineKeyboardRow(
-		tgbotapi.NewInlineKeyboardButtonData("Задания", "Переход в Задания СЭД Directum RX"),
-		tgbotapi.NewInlineKeyboardButtonURL("Сообщения", "http://directum-server.ru/Сообщения"),
-		tgbotapi.NewInlineKeyboardButtonURL("Согласования", "http://directum-server.ru/Согласования"),
+		tgbotapi.NewInlineKeyboardButtonData("Недавние документы", "Переход в Н.Документы СЭД Directum RX"),
+		tgbotapi.NewInlineKeyboardButtonURL("Избранное", "http://directum-server.ru/Избранное"),
+		tgbotapi.NewInlineKeyboardButtonURL("Общие папки", "http://directum-server.ru/Общие папки"),
 	),
 )
 
@@ -38,9 +38,9 @@ func main() {
 
 	// TLS or simple connect. Подключение по протоколу TLS или базовое
 	mux := http.NewServeMux()
-	mux.HandleFunc("/Получен Приказ", http.HandlerFunc(handler))
-	mux.HandleFunc("/Получена Заявка", http.HandlerFunc(handler))
-	mux.HandleFunc("/Получено Задание", http.HandlerFunc(handler))
+	mux.HandleFunc("/Документ на исполнение", http.HandlerFunc(handler))
+	mux.HandleFunc("/Документ на доработку", http.HandlerFunc(handler))
+	mux.HandleFunc("/Уведомление", http.HandlerFunc(handler))
 	//log.Fatal(http.ListenAndServeTLS("localhost:8077", crtFile, keyFile, nil))
 	log.Fatal(http.ListenAndServe("localhost:8077", mux))
 }
@@ -72,10 +72,11 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	updates := bot.GetUpdatesChan(u)
 
-	// Loop through each update.
+	// Loop update of data. Циклическое обновление данных
 	for update := range updates {
 
-		if surl == "" && update.Message.Text == "dirx" { // ignore any non-Message updates
+		// ignore any non-Message updates. Игнорировать несистемные сообщения
+		if surl == "" && update.Message.Text == "dirx" {
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
 			msg.Text = "Очередь Directum RX пуста"
 			if _, err = bot.Send(msg); err != nil {
@@ -85,13 +86,14 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		// Check if we've gotten a message update.
+		// Checks if we've gotten a new messages. Проверка новых сообщений
 		if update.Message != nil {
-			// Construct a new message from the given chat ID and containing
-			// the text that we received.
+			// Construct a new message with chat ID and containing rest-data that we received
+			// Создание нового сообщения с ID чата и полученными rest-данными
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, surl)
 
-			// If the message was open, add a copy of our numeric keyboard.
+			// If the message got, select needs link of keyboard
+			// Если сообщение поступило, пройдите по нужной ссылке на клаве
 			switch update.Message.Text {
 			case "dirx":
 				msg.ReplyMarkup = numericKeyboard
@@ -104,19 +106,20 @@ func handler(w http.ResponseWriter, r *http.Request) {
 				continue
 			}
 
-			// Send the message.
+			// Send the message. Отправка сообщений
 			if _, err = bot.Send(msg); err != nil {
 				panic(err)
 			}
 		} else if update.CallbackQuery != nil {
-			// Respond to the callback query, telling Telegram to show the user
-			// a message with the data received.
+			// Respond to the callback query, Telegram show the user a message with the data received.
+			// Отвечая на запрос, Telegram показывает пользователю сообщение с полученными данными.
 			callback := tgbotapi.NewCallback(update.CallbackQuery.ID, update.CallbackQuery.Data)
 			if _, err := bot.Request(callback); err != nil {
 				panic(err)
 			}
 
-			// And finally, send a message containing the data received.
+			// Sends a message containing the data received.
+			// Отправляет сообщение, содержащее полученные данные.
 			msg := tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Data)
 			if _, err := bot.Send(msg); err != nil {
 				panic(err)
