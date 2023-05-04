@@ -34,7 +34,7 @@ func main() {
 	log.SetPrefix("Client event: ")
 	log.SetFlags(log.Lshortfile)
 
-	//os.Setenv("telega_botoken", "5853322065:AAHwqJwOEVOrLMcpKf-vOW5rOYp4eByFevs")
+	//os.Setenv("telega_botoken", "telega-token_qqqqqqqqqwwwwwwEEEEEe")
 
 	// TLS or simple connect. Подключение по протоколу TLS или базовое
 	mux := http.NewServeMux()
