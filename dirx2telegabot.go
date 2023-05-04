@@ -111,15 +111,15 @@ func handler(w http.ResponseWriter, r *http.Request) {
 				panic(err)
 			}
 		} else if update.CallbackQuery != nil {
-			// Respond to the callback query, Telegram show the user a message with the data received.
-			// Отвечая на запрос, Telegram показывает пользователю сообщение с полученными данными.
+			// Respond to the callback query, Telegram show the user a message with the data received
+			// Отвечая на запрос, Telegram показывает пользователю сообщение с полученными данными
 			callback := tgbotapi.NewCallback(update.CallbackQuery.ID, update.CallbackQuery.Data)
 			if _, err := bot.Request(callback); err != nil {
 				panic(err)
 			}
 
-			// Sends a message containing the data received.
-			// Отправляет сообщение, содержащее полученные данные.
+			// Sends a message containing the data received
+			// Отправляет сообщение, содержащее полученные данные
 			msg := tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Data)
 			if _, err := bot.Send(msg); err != nil {
 				panic(err)
@@ -129,7 +129,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Func reads token from file the ./botoken.conf. Метод получения токена из конфига.
+// Func reads token from file the ./botoken.conf. Метод получения токена из конфига
 func readToken() string {
 	var botkey string
 	bk, err := os.Open("botoken.conf")
