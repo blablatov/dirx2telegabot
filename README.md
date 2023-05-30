@@ -11,7 +11,7 @@ Directum RX создано демо Решение включающее спра
 при переходе по такой гиперссылке отправляется запрос в модуль обмена с чат-ботом Telegram.
 
 При вводе ключа `dirx` выводится демо клавиатура чат-бота для взаимодействия с СЭД Directum RX. 
-    
+Фильтрация несистемных сообщений.    
 
 Demo packet exchange of rest-data from Directum RX to chat-bot Telegram.   
 After got data we can click the desired link keyboard of chat.  
