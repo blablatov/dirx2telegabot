@@ -89,7 +89,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	for update := range updates {
 
 		// Ignore any not system Message, without http data
-		// Игнорировать несистемные сообщения без http данных
+		// Фильтрация несистемных сообщений, при получении http-данных
 		if surl == "" && update.Message.Text != "" {
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
 			msg.Text = "Очередь Directum RX пуста"
