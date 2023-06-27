@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -67,11 +68,18 @@ func TestHandler(t *testing.T) { //!!!!
 		// Игнорировать несистемные сообщения без http данных
 		if surl == "" && update.Message.Text != "" {
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
+			log.Println("Очередь Directum RX пуста")
 			msg.Text = "Очередь Directum RX пуста"
 			if _, err = bot.Send(msg); err != nil {
-				panic(err)
+				p := recover()
+				log.Println("Panic, internal error, data of answed not got. recover()")
+				//panic(err)
+				panic(p)
+				fmt.Println(err.Error())
 			} else {
-				continue
+				log.Println("Очередь Directum RX пуста..")
+				return
+				//continue
 			}
 		}
 
@@ -85,33 +93,53 @@ func TestHandler(t *testing.T) { //!!!!
 			// Если сообщение поступило, пройдите по нужной ссылке на клаве
 			switch update.Message.Text {
 			case "dirx":
+				log.Println("Введено сообщение dirx")
 				msg.ReplyMarkup = numericKeyboard
+				msg.Text = "Пуск клавиатуры"
+				//os.Exit(1)
 			default:
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
+				log.Println("Ошибочное сообщение. Введите: dirx")
 				msg.Text = "Введите: dirx"
 				if _, err = bot.Send(msg); err != nil {
-					panic(err)
+					p := recover()
+					log.Println("Panic, internal error, data of answed not got. recover()")
+					//panic(err)
+					panic(p)
+					fmt.Println(err.Error())
 				}
 				continue
 			}
 
 			// Send the message. Отправка сообщений
 			if _, err = bot.Send(msg); err != nil {
-				panic(err)
+				p := recover()
+				log.Println("Panic, internal error, data of answed not got. recover()")
+				//panic(err)
+				panic(p)
+				fmt.Println(err.Error())
 			}
 		} else if update.CallbackQuery != nil {
 			// Respond to the callback query, Telegram show the user a message with the data received.
 			// Отвечая на запрос, Telegram показывает пользователю сообщение с полученными данными.
 			callback := tgbotapi.NewCallback(update.CallbackQuery.ID, update.CallbackQuery.Data)
 			if _, err := bot.Request(callback); err != nil {
-				panic(err)
+				p := recover()
+				log.Println("Panic, internal error, data of answed not got. recover()")
+				//panic(err)
+				panic(p)
+				fmt.Println(err.Error())
 			}
 
 			// Sends a message containing the data received.
 			// Отправляет сообщение, содержащее полученные данные.
 			msg := tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Data)
 			if _, err := bot.Send(msg); err != nil {
-				panic(err)
+				p := recover()
+				log.Println("Panic, internal error, data of answed not got. recover()")
+				//panic(err)
+				panic(p)
+				fmt.Println(err.Error())
 			}
 		}
 		surl = ""
