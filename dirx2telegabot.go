@@ -47,7 +47,7 @@ func main() {
 	log.Fatal(http.ListenAndServe("localhost:8077", mux))
 }
 
-// This handler is returning component path of URL.
+// This handler is returning component path of URL
 // Обработчик возвращает путь к компоненту URL
 func handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "URL.Path = %q\n", r.URL.Path)
