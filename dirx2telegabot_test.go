@@ -1,8 +1,10 @@
+// When testing, you can enter any symbols and will see "Enter: dirx".
+// After will see numeric Keyboard, input again  any symbols, will see test - Ok
+
 package main
 
 import (
 	"bufio"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -15,8 +17,6 @@ import (
 func Test(t *testing.T) {
 	log.SetPrefix("Client event: ")
 	log.SetFlags(log.Lshortfile)
-
-	//os.Setenv("telega_botoken", "5853322065:AAHwqJwOEVOrLMcpKf-vOW5rOYp4eByFevs")
 
 	// TLS or simple connect. Подключение по протоколу TLS или базовое
 	mux := http.NewServeMux()
@@ -31,8 +31,7 @@ func Test(t *testing.T) {
 }
 
 // This handler is returning component path of URL. Обработчик возвращает путь к компоненту URL
-func TestHandler(t *testing.T) { //!!!!
-	//fmt.Fprintf(w, "URL.Path = %q\n", r.URL.Path)
+func TestHandler(t *testing.T) {
 
 	URL := "http://localhost.ru/Уведомление"
 	surl := strings.TrimPrefix(URL, "/")
@@ -71,11 +70,7 @@ func TestHandler(t *testing.T) { //!!!!
 			log.Println("Очередь Directum RX пуста")
 			msg.Text = "Очередь Directum RX пуста"
 			if _, err = bot.Send(msg); err != nil {
-				p := recover()
-				log.Println("Panic, internal error, data of answed not got. recover()")
-				//panic(err)
-				panic(p)
-				fmt.Println(err.Error())
+				panic(err)
 			} else {
 				log.Println("Очередь Directum RX пуста..")
 				return
@@ -96,50 +91,33 @@ func TestHandler(t *testing.T) { //!!!!
 				log.Println("Введено сообщение dirx")
 				msg.ReplyMarkup = numericKeyboard
 				msg.Text = "Пуск клавиатуры"
-				//os.Exit(1)
 			default:
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
 				log.Println("Ошибочное сообщение. Введите: dirx")
 				msg.Text = "Введите: dirx"
 				if _, err = bot.Send(msg); err != nil {
-					p := recover()
-					log.Println("Panic, internal error, data of answed not got. recover()")
-					//panic(err)
-					panic(p)
-					fmt.Println(err.Error())
+					panic(err)
 				}
 				continue
 			}
 
 			// Send the message. Отправка сообщений
 			if _, err = bot.Send(msg); err != nil {
-				p := recover()
-				log.Println("Panic, internal error, data of answed not got. recover()")
-				//panic(err)
-				panic(p)
-				fmt.Println(err.Error())
+				panic(err)
 			}
 		} else if update.CallbackQuery != nil {
 			// Respond to the callback query, Telegram show the user a message with the data received.
 			// Отвечая на запрос, Telegram показывает пользователю сообщение с полученными данными.
 			callback := tgbotapi.NewCallback(update.CallbackQuery.ID, update.CallbackQuery.Data)
 			if _, err := bot.Request(callback); err != nil {
-				p := recover()
-				log.Println("Panic, internal error, data of answed not got. recover()")
-				//panic(err)
-				panic(p)
-				fmt.Println(err.Error())
+				panic(err)
 			}
 
 			// Sends a message containing the data received.
 			// Отправляет сообщение, содержащее полученные данные.
 			msg := tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Data)
 			if _, err := bot.Send(msg); err != nil {
-				p := recover()
-				log.Println("Panic, internal error, data of answed not got. recover()")
-				//panic(err)
-				panic(p)
-				fmt.Println(err.Error())
+				panic(err)
 			}
 		}
 		surl = ""

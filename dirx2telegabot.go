@@ -1,3 +1,5 @@
+// Demo packet exchange of rest-data from Directum RX to chat-bot Telegram.
+
 package main
 
 import (
@@ -47,20 +49,7 @@ func main() {
 
 // This handler is returning component path of URL. Обработчик возвращает путь к компоненту URL
 func handler(w http.ResponseWriter, r *http.Request) {
-	//fmt.Fprintf(w, "URL.Path = %q\n", r.URL.Path)
-
-	fmt.Fprintf(w, "%s %s %s\n", r.Method, r.URL, r.Proto)
-	for k, v := range r.Header {
-		fmt.Fprintf(w, "Header[%q] = %q\n", k, v)
-	}
-	fmt.Fprintf(w, "Host = %q\n", r.Host)
-	fmt.Fprintf(w, "RemoteAddr = %q\n", r.RemoteAddr)
-	if err := r.ParseForm(); err != nil {
-		log.Print(err)
-	}
-	for k, v := range r.Form {
-		fmt.Fprintf(w, "Form[%q] = %q\n", k, v)
-	}
+	fmt.Fprintf(w, "URL.Path = %q\n", r.URL.Path)
 
 	surl := strings.TrimPrefix(r.URL.Path, "/")
 
