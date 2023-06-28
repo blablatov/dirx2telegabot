@@ -43,9 +43,9 @@ end
 ```   
  
 
-## US  
-Before all we should do in Directum RX demo URL to http-server our the chatbot.  
-Demo packet exchange of rest-data from Directum RX to chat-bot Telegram.   
+### US  
+Before all we should do in `Directum RX` demo URL to `http`-server our the chatbot.  
+Demo packet exchange of rest-data from `Directum RX` to chat-bot `Telegram`.   
 After got data we can click the desired link keyboard of chat.  
  
   
