@@ -1,64 +1,50 @@
-// Demo packet exchange of rest-data from Directum RX to chatbot Telegram.
+// When testing, you can enter any symbols and will see "Enter: dirx".
+// After will see numeric Keyboard, input again any symbols, will see test - Ok
 
 package main
 
 import (
 	"bufio"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
-	"path/filepath"
 	"strings"
+	"testing"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-var (
-	crtFile = filepath.Join(".", "certs", "server.crt")
-	keyFile = filepath.Join(".", "certs", "server.key")
-)
-
-var numericKeyboard = tgbotapi.NewInlineKeyboardMarkup(
-	tgbotapi.NewInlineKeyboardRow(
-		tgbotapi.NewInlineKeyboardButtonURL("Общие папки", "http://directum-server.ru"),
-		tgbotapi.NewInlineKeyboardButtonData("Входящие", "Переход в Входящие СЭД Directum RX"),
-		tgbotapi.NewInlineKeyboardButtonData("Исходящие", "Переход в Исходящие СЭД Directum RX"),
-	),
-	tgbotapi.NewInlineKeyboardRow(
-		tgbotapi.NewInlineKeyboardButtonData("Недавние документы", "Переход в Н.Документы СЭД Directum RX"),
-		tgbotapi.NewInlineKeyboardButtonURL("Избранное", "http://directum-server.ru/Избранное"),
-		tgbotapi.NewInlineKeyboardButtonURL("Общие папки", "http://directum-server.ru/Общие папки"),
-	),
-)
-
-func main() {
+func Test(t *testing.T) {
 	log.SetPrefix("Client event: ")
 	log.SetFlags(log.Lshortfile)
 
-	//os.Setenv("telega_botoken", "telega-token_qqqqqqqqqwwwwwwEEEEEe")
-
 	// TLS or simple connect. Подключение по протоколу TLS или базовое
 	mux := http.NewServeMux()
-	mux.HandleFunc("/Документ на исполнение", http.HandlerFunc(handler))
+	url := "/Документ на исполнение"
+	mux.HandleFunc(url, http.HandlerFunc(handler))
 	mux.HandleFunc("/Документ на доработку", http.HandlerFunc(handler))
 	mux.HandleFunc("/Уведомление", http.HandlerFunc(handler))
 	//log.Fatal(http.ListenAndServeTLS("localhost:8077", crtFile, keyFile, nil))
-	log.Fatal(http.ListenAndServe("localhost:8077", mux))
+	if err := http.ListenAndServe("localhost:8077", mux); err != nil {
+		log.Printf("Could not setup HTTP endpoint: %v", err)
+	}
 }
 
 // This handler is returning component path of URL.
 // Обработчик возвращает путь к компоненту URL
-func handler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "URL.Path = %q\n", r.URL.Path)
+func TestHandler(t *testing.T) {
 
-	surl := strings.TrimPrefix(r.URL.Path, "/")
+	URL := "http://localhost.ru/Уведомление"
+	surl := strings.TrimPrefix(URL, "/")
 
 	// Getting token from config. Получение токена из конфига.
 	chkey := make(chan string)
 	go func() {
 		chkey <- readToken()
 	}()
+	if chkey != nil {
+		log.Printf("Test of run token file is success: %v", chkey)
+	}
 
 	//bot, err := tgbotapi.NewBotAPI(os.Getenv("telega_botoken"))
 	bot, err := tgbotapi.NewBotAPI(<-chkey)
@@ -79,14 +65,17 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	for update := range updates {
 
 		// Ignore any not system Message, without http data
-		// Фильтрация несистемных сообщений, при получении http-данных
+		// Игнорировать несистемные сообщения без http данных
 		if surl == "" && update.Message.Text != "" {
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
+			log.Println("Очередь Directum RX пуста")
 			msg.Text = "Очередь Directum RX пуста"
 			if _, err = bot.Send(msg); err != nil {
 				panic(err)
 			} else {
-				continue
+				log.Println("Очередь Directum RX пуста..")
+				return
+				//continue
 			}
 		}
 
@@ -100,9 +89,12 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			// Если сообщение поступило, пройдите по нужной ссылке на клаве
 			switch update.Message.Text {
 			case "dirx":
+				log.Println("Введено сообщение dirx")
 				msg.ReplyMarkup = numericKeyboard
+				msg.Text = "Пуск клавиатуры"
 			default:
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
+				log.Println("Ошибочное сообщение. Введите: dirx")
 				msg.Text = "Введите: dirx"
 				if _, err = bot.Send(msg); err != nil {
 					panic(err)
@@ -115,15 +107,15 @@ func handler(w http.ResponseWriter, r *http.Request) {
 				panic(err)
 			}
 		} else if update.CallbackQuery != nil {
-			// Respond to the callback query, Telegram show the user a message with the data received
-			// Отвечая на запрос, Telegram показывает пользователю сообщение с полученными данными
+			// Respond to the callback query, Telegram show the user a message with the data received.
+			// Отвечая на запрос, Telegram показывает пользователю сообщение с полученными данными.
 			callback := tgbotapi.NewCallback(update.CallbackQuery.ID, update.CallbackQuery.Data)
 			if _, err := bot.Request(callback); err != nil {
 				panic(err)
 			}
 
-			// Sends a message containing the data received
-			// Отправляет сообщение, содержащее полученные данные
+			// Sends a message containing the data received.
+			// Отправляет сообщение, содержащее полученные данные.
 			msg := tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Data)
 			if _, err := bot.Send(msg); err != nil {
 				panic(err)
@@ -134,8 +126,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 // Func reads token from file the ./botoken.conf.
-// Метод получения токена из конфига
-func readToken() string {
+// Метод получения токена из конфига.
+func TestReadToken(t *testing.T) {
 	var botkey string
 	bk, err := os.Open("botoken.conf")
 	if err != nil {
@@ -146,5 +138,7 @@ func readToken() string {
 	for input.Scan() {
 		botkey = input.Text()
 	}
-	return botkey
+	if botkey != "" {
+		log.Println("Test of run token file: ", botkey)
+	}
 }
