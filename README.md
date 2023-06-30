@@ -8,11 +8,11 @@
 В демо пакете токен авторизации для одного пользователя хранится явно в конфиге.    
 В полной версии токены пользователей хранятся в БД.  
 
-В `Directum RX` создано демо Решение включающее справочник с фиксированными rest-запррсами,  
+В `Directum RX` создано демо Решение включающее справочник с фиксированными `rest`-запросами,  
 при переходе по такой гиперссылке отправляется запрос в модуль обмена с чат-ботом `Telegram`.
 
 ### Использование. How use  
-По клику на сформированной демо-ссылке в `Directum RX`, отправляется `rest`-сообщение к `http-серверу` чат-бота.  
+По клику на сформированной демо-ссылке в `Directum RX`, отправляется `rest`-сообщение к `http`-серверу чат-бота.  
 Пользователь может в любой момент ввести сообщение запроса данных `dirx` в своем чат-боте `Telegram`.  
 При вводе ключа `dirx` выводится демо клавиатура чат-бота для взаимодействия с СЭД `Directum RX`. 
 Если данных из `Directum RX` нет, видим сообщение `Очередь Directum RX пуста`.  
@@ -45,7 +45,7 @@ end
 
 ### US  
 Before all we should do in `Directum RX` demo URL to `http`-server our the chatbot.  
-Demo packet exchange of rest-data from `Directum RX` to chat-bot `Telegram`.   
+Demo packet exchange of `rest`-data from `Directum RX` to chat-bot `Telegram`.   
 After got data we can click the desired link keyboard of chat.  
  
   
