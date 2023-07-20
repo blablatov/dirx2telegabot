@@ -1,23 +1,27 @@
-# Multi-stage dirx2telegabot build
-# Многоэтапная сборка dirx2telegabot
+# Yandex Compute Cloud:
+# $ sudo docker build . -t cr.yandex/${REGISTRY_ID}/debian:dirx2telegabot -f Dockerfile
+# $ sudo docker run --name dirx2telegabot -p 8077:8077 -d cr.yandex/${REGISTRY_ID}/debian:dirx2telegabot
+# test:
+# $ curl external_address_vm:8077/Уведомление
 
-FROM golang AS build
+# Local:
+# $ docker build -t dirx2telegabot -f Dockerfile
+# $ docker run --name dirx2telegabot -p 8077:8077 -d dirx2telegabot
+# test:
+# $ curl localhost:8077/Уведомление
 
-ENV location /go/src/github.com/blablatov/dirx2telegabot
+FROM golang:1.20
 
-WORKDIR ${location}/dirx2telegabot
+WORKDIR /app
 
-ADD ./dirx2telegabot.go ${location}/dirx2telegabot
+COPY go.mod go.sum ./
+RUN go mod download
 
-RUN go mod init github.com/blablatov/dirx2telegabot/dirx2telegabot
+COPY *.go ./
+COPY *.conf ./
 
-RUN CGO_ENABLED=0 go build -o dirx2telegabot
+RUN CGO_ENABLED=0 GOOS=linux go build -o /dirx2telegabot
 
-# Go binaries are self-contained executables. Используя директиву FROM scratch - 
-# Go образы  не должны содержать ничего, кроме одного двоичного исполняемого файла.
+EXPOSE 8077
 
-FROM scratch
-COPY --from=build ./dirx2telegabot ./dirx2telegabot
-
-ENTRYPOINT ["./dirx2telegabot"]
-EXPOSE 50051
+CMD ["/dirx2telegabot"]
