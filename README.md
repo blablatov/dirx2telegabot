@@ -9,7 +9,25 @@
 В полной версии токены пользователей хранятся в БД.  
 
 В `Directum RX` создано демо Решение включающее справочник с фиксированными `rest`-запросами,  
-при переходе по такой гиперссылке отправляется запрос в модуль обмена с чат-ботом `Telegram`.
+при переходе по такой гиперссылке отправляется запрос в модуль обмена с чат-ботом `Telegram`.  
+
+### Сборка локально и в Yandex Cloud. Build local and to Yandex Cloud  
+#### Локально. Local:  
+	docker build -t dirx2telegabot -f Dockerfile  
+	
+#### Облако. Cloud.  
+	sudo docker build . -t cr.yandex/${REGISTRY_ID}/debian:dirx2telegabot -f Dockerfile
+
+
+### Тестирование локально и в Yandex Cloud. Testing local and to Yandex Cloud      
+#### Локально. Local:    
+	docker run --name dirx2telegabot -p 8077:8077 -d dirx2telegabot
+	curl localhost:8077/Уведомление  
+
+#### Облако. Cloud.  
+	sudo docker run --name dirx2telegabot -p 8077:8077 -d cr.yandex/${REGISTRY_ID}/debian:dirx2telegabot  
+	curl external_address_vm:8077/Уведомление
+	
 
 ### Использование. How use  
 По клику на сформированной демо-ссылке в `Directum RX`, отправляется `rest`-сообщение к `http`-серверу чат-бота.  
