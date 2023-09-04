@@ -50,7 +50,30 @@ func main() {
 // This handler is returning component path of URL
 // Обработчик возвращает путь к компоненту URL
 func handler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "URL.Path = %q\n", r.URL.Path)
+	fmt.Println("\nRequest of client:\n")
+
+	fmt.Fprintf(w, "Method = %s\nURL = %s\nProto = %s\n", r.Method, r.URL, r.Proto)
+	fmt.Printf("Method = %s\nURL = %s\nProto = %s\n", r.Method, r.URL, r.Proto)
+
+	for k, v := range r.Header {
+		fmt.Fprintf(w, "Header[%q] = %q\n", k, v)
+		fmt.Printf("Header[%q] = %q\n", k, v)
+	}
+
+	fmt.Fprintf(w, "Host = %q\n", r.Host)
+	fmt.Printf("Host = %q\n", r.Host)
+
+	fmt.Fprintf(w, "RemoteAddr = %q\n", r.RemoteAddr)
+	fmt.Printf("RemoteAddr = %q\n", r.RemoteAddr)
+
+	if err := r.ParseForm(); err != nil {
+		log.Print(err)
+	}
+	for k, v := range r.Form {
+		fmt.Fprintf(w, "Form[%q] = %q\n", k, v)
+		fmt.Printf("Form[%q] = %q\n", k, v)
+	}
+	// TODO: дескрипторы полей структуры HTTP-обработчика
 
 	surl := strings.TrimPrefix(r.URL.Path, "/")
 
