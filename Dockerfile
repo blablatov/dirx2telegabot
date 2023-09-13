@@ -1,7 +1,7 @@
 FROM golang:1.20
 
 RUN git clone https://github.com/blablatov/dirx2telegabot.git
-WORKDIR /dirx2telegabot
+WORKDIR dirx2telegabot
 
 RUN go mod download
 
